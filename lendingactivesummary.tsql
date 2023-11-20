@@ -1,0 +1,15 @@
+CREATE OR REPLACE VIEW public.lendingactivesummary
+AS WITH ctn AS (
+         SELECT bb.member_id,
+            b.genre,
+            count(*) AS genre_count
+           FROM borrowed_books bb
+             JOIN books b ON bb.book_id = b.id
+          WHERE bb.return_date IS NULL
+          GROUP BY bb.member_id, b.genre
+        )
+ SELECT ctn.member_id,
+    ctn.genre,
+    ctn.genre_count,
+    sum(ctn.genre_count) OVER (PARTITION BY ctn.member_id) AS total
+   FROM ctn;
